@@ -21,6 +21,7 @@ import org.apache.curator.test.TestingServer;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.dolphinscheduler.extras.AdditionalDebugLogic;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -33,7 +34,9 @@ public class StandaloneServer {
             // We cannot use try-with-resources to close "TestingServer", since SpringApplication.run() will not block
             // the main thread.
             TestingServer zookeeperServer = new TestingServer(true);
-            System.setProperty("registry.zookeeper.connect-string", zookeeperServer.getConnectString());
+            String connectionString = zookeeperServer.getConnectString();
+            AdditionalDebugLogic.log(String.format("ZooKeeper connection string = %s", connectionString));
+            System.setProperty("registry.zookeeper.connect-string", connectionString);
             SpringApplication.run(StandaloneServer.class, args);
         } catch (Exception ex) {
             log.error("StandaloneServer start failed", ex);

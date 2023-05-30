@@ -42,8 +42,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://127.0.0.1:5432/dolphinscheduler
-    username: root
-    password: root
+    username: postgres
+    password: 123456
     hikari:
       connection-test-query: select 1
       minimum-idle: 5
@@ -123,7 +123,7 @@ metrics:
 
 python-gateway:
   # Weather enable python gateway server or not. The default value is true.
-  enabled: true
+  enabled: false
   # Authentication token for connection from python api to python gateway server. Should be changed the default value
   # when you deploy in public network.
   auth-token: jwUDzpLsNKEFER4*a8gruBH_GsAurNxU7A@Xc
