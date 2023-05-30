@@ -1,13 +1,15 @@
 package org.apache.dolphinscheduler.extras;
 
-import lombok.SneakyThrows;
-import org.h2.tools.Server;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import java.sql.Connection;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
-import java.sql.Connection;
+
+import lombok.SneakyThrows;
+
+import org.h2.tools.Server;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class AdditionalDebugLogic {
