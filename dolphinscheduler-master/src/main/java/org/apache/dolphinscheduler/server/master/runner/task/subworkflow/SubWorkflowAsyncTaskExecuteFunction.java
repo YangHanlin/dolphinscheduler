@@ -17,12 +17,18 @@
 
 package org.apache.dolphinscheduler.server.master.runner.task.subworkflow;
 
+import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.dao.entity.ProcessInstance;
 import org.apache.dolphinscheduler.dao.repository.ProcessInstanceDao;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
+import org.apache.dolphinscheduler.plugin.task.api.model.Property;
+import org.apache.dolphinscheduler.plugin.task.api.parameters.SubProcessParameters;
 import org.apache.dolphinscheduler.server.master.runner.execute.AsyncTaskExecuteFunction;
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -33,12 +39,15 @@ public class SubWorkflowAsyncTaskExecuteFunction implements AsyncTaskExecuteFunc
     private static final Duration SUB_WORKFLOW_TASK_EXECUTE_STATE_CHECK_INTERVAL = Duration.ofSeconds(10);
 
     private final TaskExecutionContext taskExecutionContext;
+    private final SubProcessParameters taskParameters;
     private final ProcessInstanceDao processInstanceDao;
     private ProcessInstance subWorkflowInstance;
 
     public SubWorkflowAsyncTaskExecuteFunction(TaskExecutionContext taskExecutionContext,
+                                               SubProcessParameters taskParameters,
                                                ProcessInstanceDao processInstanceDao) {
         this.taskExecutionContext = taskExecutionContext;
+        this.taskParameters = taskParameters;
         this.processInstanceDao = processInstanceDao;
     }
 
@@ -55,6 +64,7 @@ public class SubWorkflowAsyncTaskExecuteFunction implements AsyncTaskExecuteFunc
         }
         subWorkflowInstance = processInstanceDao.queryByWorkflowInstanceId(subWorkflowInstance.getId());
         if (subWorkflowInstance != null && subWorkflowInstance.getState().isFinished()) {
+            fillOutputVariables();
             return subWorkflowInstance.getState().isSuccess() ? AsyncTaskExecutionStatus.SUCCESS
                     : AsyncTaskExecutionStatus.FAILED;
         }
@@ -64,5 +74,21 @@ public class SubWorkflowAsyncTaskExecuteFunction implements AsyncTaskExecuteFunc
     @Override
     public @NonNull Duration getAsyncTaskStateCheckInterval() {
         return SUB_WORKFLOW_TASK_EXECUTE_STATE_CHECK_INTERVAL;
+    }
+
+    private void fillOutputVariables() {
+        // TODO: Improve error handling logic
+
+        List<Property> subProcessProperties = Optional.of(subWorkflowInstance) // this cannot be null
+                .map(ProcessInstance::getVarPool)
+                .map(subProcessVarPool -> JSONUtils.toList(subProcessVarPool, Property.class))
+                .orElseGet(Collections::emptyList);
+
+        if (subProcessProperties.isEmpty()) {
+            log.warn("No subprocess properties found");
+            return;
+        }
+
+        subProcessProperties.forEach(taskParameters::addPropertyToValPool);
     }
 }
