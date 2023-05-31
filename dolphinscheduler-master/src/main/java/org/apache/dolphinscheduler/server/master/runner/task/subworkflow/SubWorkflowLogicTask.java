@@ -61,7 +61,7 @@ public class SubWorkflowLogicTask extends BaseAsyncLogicTask<SubProcessParameter
     @Override
     public AsyncTaskExecuteFunction getAsyncTaskExecuteFunction() throws MasterTaskExecuteException {
         // todo: create sub workflow instance here?
-        return new SubWorkflowAsyncTaskExecuteFunction(taskExecutionContext, processInstanceDao);
+        return new SubWorkflowAsyncTaskExecuteFunction(taskExecutionContext, taskParameters, processInstanceDao);
     }
 
     @Override
